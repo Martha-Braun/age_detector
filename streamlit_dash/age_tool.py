@@ -112,7 +112,7 @@ class DashboardApp:
 
             # save image with faces marked
             status = cv2.imwrite(
-                "streamlit_dash/pictures/faces_detected/faces_detected.jpg",
+                "streamlit_dash/pictures/faces_marked/faces_detected.jpg",
                 detected_image,
             )
 
@@ -121,20 +121,6 @@ class DashboardApp:
 
         # Option Make Predictions
         if self.option == "Make Predictions":
-            # get path of one image
-            img_path = "streamlit_dash/pictures/faces_detected/face_0_c1.png"
-            img = cv2.imread(img_path)
-
-            # resize image to models input shape
-            img = resize(
-                img, (200, 200), mode="reflect", preserve_range=True, anti_aliasing=True
-            )
-
-            # add a fake dimension for a batch of 1
-            img_batch = preprocess_input(img[np.newaxis]).astype("float32")
-
-            # check if correct shape for model
-            print(img_batch.shape)
 
             # load json and create model
             json_file = open("streamlit_dash/model/model_mb.json", "r")
@@ -145,12 +131,35 @@ class DashboardApp:
             loaded_model.load_weights("streamlit_dash/model/mb_model_weights.h5")
             print("Loaded model from disk")
 
-            # make prediction and convert back to numpy object
-            predictions = loaded_model(img_batch).numpy()
-            st.markdown(f"Number of classes {predictions.shape[1]}")
-            st.markdown(
-                f"Highest probability class is {np.argmax(predictions, axis=-1)}"
-            )
+            img_detected_faces = os.listdir("streamlit_dash/pictures/faces_detected")
+
+            for face in img_detected_faces:
+                # get path of one image
+                img_folder_path = "streamlit_dash/pictures/faces_detected/"
+                img = cv2.imread(img_folder_path + face)
+
+                # resize image to models input shape
+                img = resize(
+                    img,
+                    (200, 200),
+                    mode="reflect",
+                    preserve_range=True,
+                    anti_aliasing=True,
+                )
+
+                # add a fake dimension for a batch of 1
+                img_batch = preprocess_input(img[np.newaxis]).astype("float32")
+
+                # check if correct shape for model
+                print(img_batch.shape)
+
+                # make prediction and convert back to numpy object
+                predictions = loaded_model(img_batch).numpy()
+                st.image(img_folder_path + face)
+                # st.markdown(f"Number of classes {predictions.shape[1]}")
+                st.markdown(
+                    f"Highest probability class is {np.argmax(predictions, axis=-1)}"
+                )
 
         # Option Welcome
         if self.option == "Party Time!":
