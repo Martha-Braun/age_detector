@@ -1,11 +1,18 @@
 # import libraries
 import os
 import pandas as pd
+import numpy as np
 import streamlit as st
 import datetime
 from PIL import Image
 import cv2
 import matplotlib as plt
+
+from keras.models import model_from_json
+from skimage.transform import resize
+from keras.applications.resnet import ResNet50
+from tensorflow.keras.applications.imagenet_utils import preprocess_input
+from tensorflow.keras.optimizers import Adam
 
 
 class DashboardApp:
@@ -39,6 +46,7 @@ class DashboardApp:
             (
                 "Take Picture",
                 "Detect Faces",
+                "Make Predictions",
                 "Party Time!",
             ),
         )
@@ -93,16 +101,56 @@ class DashboardApp:
                 cv2.rectangle(detected_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
                 roi_color = image[y : y + h, x : x + w]
                 print("[INFO] Object found. Saving locally.")
+                # save all detected faces individually
                 cv2.imwrite(
-                    "pictures/faces_detected/face_" + str(idx) + "_" + image_file,
+                    "streamlit_dash/pictures/faces_detected/face_"
+                    + str(idx)
+                    + "_"
+                    + image_file,
                     roi_color,
                 )
 
+            # save image with faces marked
             status = cv2.imwrite(
-                "pictures/faces_detected/faces_detected.jpg", detected_image
+                "streamlit_dash/pictures/faces_detected/faces_detected.jpg",
+                detected_image,
             )
 
+            # show uploaded image marking faces detected
             st.image(detected_image)
+
+        # Option Make Predictions
+        if self.option == "Make Predictions":
+            # get path of one image
+            img_path = "streamlit_dash/pictures/faces_detected/face_0_c1.png"
+            img = cv2.imread(img_path)
+
+            # resize image to models input shape
+            img = resize(
+                img, (200, 200), mode="reflect", preserve_range=True, anti_aliasing=True
+            )
+
+            # add a fake dimension for a batch of 1
+            img_batch = preprocess_input(img[np.newaxis]).astype("float32")
+
+            # check if correct shape for model
+            print(img_batch.shape)
+
+            # load json and create model
+            json_file = open("streamlit_dash/model/model_mb.json", "r")
+            loaded_model_json = json_file.read()
+            json_file.close()
+            loaded_model = model_from_json(loaded_model_json)
+            # load weights into new model
+            loaded_model.load_weights("streamlit_dash/model/mb_model_weights.h5")
+            print("Loaded model from disk")
+
+            # make prediction and convert back to numpy object
+            predictions = loaded_model(img_batch).numpy()
+            st.markdown(f"Number of classes {predictions.shape[1]}")
+            st.markdown(
+                f"Highest probability class is {np.argmax(predictions, axis=-1)}"
+            )
 
         # Option Welcome
         if self.option == "Party Time!":
