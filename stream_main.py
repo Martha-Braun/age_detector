@@ -1,5 +1,4 @@
-from streamlit.age_tool import *
-import streamlit as st
+from streamlit_dash.age_tool import *
 
 
 def main():
