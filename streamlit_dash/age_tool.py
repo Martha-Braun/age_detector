@@ -45,7 +45,8 @@ class DashboardApp:
             "Pick Dashboard:",
             (
                 "Take Picture",
-                "Detect Faces",
+                "Detect Faces from Upload",
+                "Detect Faces from WebCam",
                 "Make Predictions",
                 "Party Time!",
             ),
@@ -81,7 +82,47 @@ class DashboardApp:
                 st.write("Click Run to Start Webcam")
 
         # Option Predict Age
-        if self.option == "Detect Faces":
+        if self.option == "Detect Faces from Upload":
+            st.title("Step 2: Detect Faces")
+            
+            uploaded_file = st.file_uploader("Upload Image", type=["png","jpg","jpeg"])
+            
+            if uploaded_file is not None:                  
+                up_image = cv2.imread(os.path.join(str(Path.home() / "Downloads"), uploaded_file.name))
+                gray = cv2.cvtColor(up_image, cv2.COLOR_BGR2GRAY)
+
+                faceCascade = cv2.CascadeClassifier(
+                    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+                )
+                faces = faceCascade.detectMultiScale(
+                    gray, scaleFactor=1.3, minNeighbors=3, minSize=(30, 30)
+                )
+
+                detected_image = up_image.copy()
+                for idx, (x, y, w, h) in enumerate(faces):
+                    cv2.rectangle(detected_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    roi_color = up_image[y : y + h, x : x + w]
+                    print("[INFO] Object found. Saving locally.")
+                    # save all detected faces individually
+                    cv2.imwrite(
+                        "streamlit_dash/pictures/faces_detected/face_"
+                        + str(idx)
+                        + "_"
+                        + uploaded_file.name,
+                        roi_color,
+                    )
+
+                # save image with faces marked
+                status = cv2.imwrite(
+                    "streamlit_dash/pictures/faces_marked/faces_detected.jpg",
+                    detected_image,
+                )
+
+                # show uploaded image marking faces detected
+                st.image(detected_image, channels="BGR")
+                
+        # Option Predict Age
+        if self.option == "Detect Faces from WebCam":
             st.title("Step 2: Detect Faces")
 
             folder_path = "streamlit_dash/pictures/picture_taken"
