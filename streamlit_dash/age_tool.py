@@ -2,6 +2,7 @@
 import os
 import pandas as pd
 import numpy as np
+from skimage.color.colorconv import rgb2gray
 import streamlit as st
 import datetime
 from PIL import Image
@@ -9,6 +10,8 @@ import cv2
 import matplotlib as plt
 from pathlib import Path
 
+from skimage.color import gray2rgb
+from skimage.color import rgb2gray
 import tensorflow as tf
 from keras.models import model_from_json
 from skimage.transform import resize
@@ -135,6 +138,7 @@ class DashboardApp:
 
             folder_path = "streamlit_dash/pictures/picture_taken"
             image_file = "c1.png"
+
             # take the image and convert it to an OpenCV object
             image = cv2.imread(os.path.join(folder_path, image_file))
             # convert it to grayscale
@@ -198,37 +202,37 @@ class DashboardApp:
                 img = cv2.imread(img_folder_path + face)
 
                 # resize image to models input shape
-                img = resize(
-                    img,
-                    (48, 48),
-                    mode="reflect",
-                    preserve_range=True,
-                    anti_aliasing=True,
-                )
+                img_resized = resize(img, (48, 48))
+
+                # transform to gray scale
+                img_gray = rgb2gray(img_resized)
+
+                # retransform to rgb to get right shape
+                img_rgb = gray2rgb(img_gray)
 
                 # add a fake dimension for a batch of 1
-                img_batch = preprocess_input(img[np.newaxis]).astype("float32")
+                img_batch = tf.expand_dims(img_rgb, axis=0)
 
                 # check if correct shape for model
                 print(img_batch.shape)
+                print(img_batch.dtype)
 
-                # make prediction and convert back to numpy object
-                predictions = loaded_model.predict(img_batch)  # .numpy()
-                st.image(img_folder_path + face)
+                # make prediction
+                predictions = loaded_model.predict(img_batch)
+                st.image(img_folder_path + face, width=300)  # img_folder_path + face
 
                 # st.markdown(f"Number of classes {predictions.shape[1]}")
                 # dictionary classes to age
                 age_buckets = {
-                    0: "0-3",
-                    1: "3-7",
-                    2: "7-12",
-                    3: "14-22",
-                    4: "22-30",
-                    5: "30-38",
-                    6: "38-47",
+                    0: "0-7",
+                    1: "7-14",
+                    2: "14-22",
+                    3: "22-30",
+                    4: "30-38",
+                    5: "38-47",
+                    6: "47-58",
                     7: "47-58",
-                    8: "50-70",
-                    9: "70+",
+                    8: "58-120",
                 }
 
                 st.markdown(
