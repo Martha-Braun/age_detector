@@ -213,10 +213,6 @@ class DashboardApp:
                 # add a fake dimension for a batch of 1
                 img_batch = tf.expand_dims(img_rgb, axis=0)
 
-                # check if correct shape for model
-                print(img_batch.shape)
-                print(img_batch.dtype)
-
                 # make prediction
                 predictions = loaded_model.predict(img_batch)
                 st.image(img_folder_path + face, width=300)  # img_folder_path + face
