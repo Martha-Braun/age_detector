@@ -4,8 +4,10 @@ Streamlit application on which the age of a person can be predicted from an uplo
 ## Example
 
 ## Usage
-Clone repository
-Install requirements using poetry install 
+Clone repository.
+
+Install requirements using poetry install.
+
 ```bash
 streamlit run stream_main.py
 ```
