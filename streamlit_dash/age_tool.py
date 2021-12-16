@@ -8,6 +8,7 @@ from PIL import Image
 import cv2
 import matplotlib as plt
 
+import tensorflow as tf
 from keras.models import model_from_json
 from skimage.transform import resize
 from keras.applications.resnet import ResNet50
@@ -129,14 +130,17 @@ class DashboardApp:
         # Option Make Predictions
         if self.option == "Make Predictions":
 
-            # load json and create model
-            json_file = open("streamlit_dash/model/model_mb.json", "r")
-            loaded_model_json = json_file.read()
-            json_file.close()
-            loaded_model = model_from_json(loaded_model_json)
-            # load weights into new model
-            loaded_model.load_weights("streamlit_dash/model/mb_model_weights.h5")
-            print("Loaded model from disk")
+            # # load json and create model
+            # json_file = open("streamlit_dash/model/model_mb.json", "r")
+            # loaded_model_json = json_file.read()
+            # json_file.close()
+            # loaded_model = model_from_json(loaded_model_json)
+            # # load weights into new model
+            # loaded_model.load_weights("streamlit_dash/model/mb_model_weights.h5")
+            # print("Loaded model from disk")
+
+            model_dir = "streamlit_dash/model/"
+            loaded_model = tf.keras.models.load_model(model_dir)
 
             img_detected_faces = os.listdir("streamlit_dash/pictures/faces_detected")
 
@@ -148,7 +152,7 @@ class DashboardApp:
                 # resize image to models input shape
                 img = resize(
                     img,
-                    (200, 200),
+                    (48, 48),
                     mode="reflect",
                     preserve_range=True,
                     anti_aliasing=True,
@@ -161,11 +165,26 @@ class DashboardApp:
                 print(img_batch.shape)
 
                 # make prediction and convert back to numpy object
-                predictions = loaded_model(img_batch).numpy()
+                predictions = loaded_model.predict(img_batch)  # .numpy()
                 st.image(img_folder_path + face)
+
                 # st.markdown(f"Number of classes {predictions.shape[1]}")
+                # dictionary classes to age
+                age_buckets = {
+                    0: "0-3",
+                    1: "3-7",
+                    2: "7-12",
+                    3: "14-22",
+                    4: "22-30",
+                    5: "30-38",
+                    6: "38-47",
+                    7: "47-58",
+                    8: "50-70",
+                    9: "70+",
+                }
+
                 st.markdown(
-                    f"Highest probability class is {np.argmax(predictions, axis=-1)}"
+                    f"You're age range is {age_buckets[np.argmax(predictions)]}"
                 )
 
         # Option Welcome
