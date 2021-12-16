@@ -6,14 +6,8 @@ import streamlit as st
 import datetime
 from PIL import Image
 import cv2
+from pathlib import Path
 import matplotlib as plt
-
-import tensorflow as tf
-from keras.models import model_from_json
-from skimage.transform import resize
-from keras.applications.resnet import ResNet50
-from tensorflow.keras.applications.imagenet_utils import preprocess_input
-from tensorflow.keras.optimizers import Adam
 
 
 class DashboardApp:
@@ -46,8 +40,8 @@ class DashboardApp:
             "Pick Dashboard:",
             (
                 "Take Picture",
+                "Detect Faces from Camera",
                 "Detect Faces from Upload",
-                "Detect Faces from WebCam",
                 "Make Predictions",
                 "Party Time!",
             ),
@@ -68,21 +62,18 @@ class DashboardApp:
             st.subheader("Smile!")
             run = st.checkbox("Run")
             FRAME_WINDOW = st.image([])
-            camera = cv2.VideoCapture(0)  # video capture source (Here webcam of laptop)
-
+            camera = cv2.VideoCapture(
+                0
+            )  # video capture source camera (Here webcam of laptop)
             while run:
                 _, frame = camera.read()  # return a single frame in variable `frame`
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 FRAME_WINDOW.image(frame)
-                color_conversion = cv2.COLOR_BGR2RGB  # color code to convert BGR to RGB
-                im_rgb = cv2.cvtColor(frame, color_conversion)
-                cv2.imwrite(
-                    "streamlit_dash/pictures/picture_taken/c1.png", im_rgb
-                )  # save image
+                
+                cv2.imwrite("streamlit_dash/pictures/picture_taken/c1.png", frame)
             else:
-                st.write("Click Run to Start Webcam")
+                st.write("Click Run to Start Webcam and Stop to take the picture")
 
-        # Option Predict Age
         if self.option == "Detect Faces from Upload":
             st.title("Step 2: Detect Faces")
             
@@ -90,6 +81,8 @@ class DashboardApp:
             
             if uploaded_file is not None:                  
                 up_image = cv2.imread(os.path.join(str(Path.home() / "Downloads"), uploaded_file.name))
+                # st.image(up_image, channels="BGR", width=400) # view image
+                
                 gray = cv2.cvtColor(up_image, cv2.COLOR_BGR2GRAY)
 
                 faceCascade = cv2.CascadeClassifier(
@@ -121,9 +114,9 @@ class DashboardApp:
 
                 # show uploaded image marking faces detected
                 st.image(detected_image, channels="BGR")
-                
+
         # Option Predict Age
-        if self.option == "Detect Faces from WebCam":
+        if self.option == "Detect Faces from Camera":
             st.title("Step 2: Detect Faces")
 
             folder_path = "streamlit_dash/pictures/picture_taken"
@@ -141,7 +134,6 @@ class DashboardApp:
             )
 
             detected_image = image.copy()
-
             for idx, (x, y, w, h) in enumerate(faces):
                 cv2.rectangle(detected_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
                 roi_color = image[y : y + h, x : x + w]
@@ -155,78 +147,15 @@ class DashboardApp:
                     roi_color,
                 )
 
-            # convert BGR to RGB code
-            color_conversion = cv2.COLOR_BGR2RGB  # color code to convert BGR to RGB
-            marked_img_rgb = cv2.cvtColor(detected_image, color_conversion)
-
             # save image with faces marked
-            cv2.imwrite(
-                "streamlit_dash/pictures/picture_marked/marked_img_rgb.jpg",
-                marked_img_rgb,
+            status = cv2.imwrite(
+                "streamlit_dash/pictures/faces_marked/faces_detected.jpg",
+                detected_image,
             )
 
             # show uploaded image marking faces detected
-            st.image(marked_img_rgb)
-
-        # Option Make Predictions
-        if self.option == "Make Predictions":
-
-            # # load json and create model
-            # json_file = open("streamlit_dash/model/model_mb.json", "r")
-            # loaded_model_json = json_file.read()
-            # json_file.close()
-            # loaded_model = model_from_json(loaded_model_json)
-            # # load weights into new model
-            # loaded_model.load_weights("streamlit_dash/model/mb_model_weights.h5")
-            # print("Loaded model from disk")
-
-            model_dir = "streamlit_dash/model/"
-            loaded_model = tf.keras.models.load_model(model_dir)
-
-            img_detected_faces = os.listdir("streamlit_dash/pictures/faces_detected")
-
-            for face in img_detected_faces:
-                # get path of one image
-                img_folder_path = "streamlit_dash/pictures/faces_detected/"
-                img = cv2.imread(img_folder_path + face)
-
-                # resize image to models input shape
-                img = resize(
-                    img,
-                    (48, 48),
-                    mode="reflect",
-                    preserve_range=True,
-                    anti_aliasing=True,
-                )
-
-                # add a fake dimension for a batch of 1
-                img_batch = preprocess_input(img[np.newaxis]).astype("float32")
-
-                # check if correct shape for model
-                print(img_batch.shape)
-
-                # make prediction and convert back to numpy object
-                predictions = loaded_model.predict(img_batch)  # .numpy()
-                st.image(img_folder_path + face)
-
-                # st.markdown(f"Number of classes {predictions.shape[1]}")
-                # dictionary classes to age
-                age_buckets = {
-                    0: "0-3",
-                    1: "3-7",
-                    2: "7-12",
-                    3: "14-22",
-                    4: "22-30",
-                    5: "30-38",
-                    6: "38-47",
-                    7: "47-58",
-                    8: "50-70",
-                    9: "70+",
-                }
-
-                st.markdown(
-                    f"You're age range is {age_buckets[np.argmax(predictions)]}"
-                )
+            st.image(detected_image) 
+                    
 
         # Option Welcome
         if self.option == "Party Time!":
