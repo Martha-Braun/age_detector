@@ -66,15 +66,17 @@ class DashboardApp:
             st.subheader("Smile!")
             run = st.checkbox("Run")
             FRAME_WINDOW = st.image([])
-            camera = cv2.VideoCapture(
-                0
-            )  # video capture source camera (Here webcam of laptop)
+            camera = cv2.VideoCapture(0)  # video capture source (Here webcam of laptop)
 
             while run:
                 _, frame = camera.read()  # return a single frame in variable `frame`
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 FRAME_WINDOW.image(frame)
-                cv2.imwrite("streamlit_dash/pictures/picture_taken/c1.png", frame)
+                color_conversion = cv2.COLOR_BGR2RGB  # color code to convert BGR to RGB
+                im_rgb = cv2.cvtColor(frame, color_conversion)
+                cv2.imwrite(
+                    "streamlit_dash/pictures/picture_taken/c1.png", im_rgb
+                )  # save image
             else:
                 st.write("Click Run to Start Webcam")
 
@@ -97,6 +99,7 @@ class DashboardApp:
             )
 
             detected_image = image.copy()
+
             for idx, (x, y, w, h) in enumerate(faces):
                 cv2.rectangle(detected_image, (x, y), (x + w, y + h), (0, 0, 255), 2)
                 roi_color = image[y : y + h, x : x + w]
@@ -110,14 +113,18 @@ class DashboardApp:
                     roi_color,
                 )
 
+            # convert BGR to RGB code
+            color_conversion = cv2.COLOR_BGR2RGB  # color code to convert BGR to RGB
+            marked_img_rgb = cv2.cvtColor(detected_image, color_conversion)
+
             # save image with faces marked
-            status = cv2.imwrite(
-                "streamlit_dash/pictures/faces_marked/faces_detected.jpg",
-                detected_image,
+            cv2.imwrite(
+                "streamlit_dash/pictures/picture_marked/marked_img_rgb.jpg",
+                marked_img_rgb,
             )
 
             # show uploaded image marking faces detected
-            st.image(detected_image)
+            st.image(marked_img_rgb)
 
         # Option Make Predictions
         if self.option == "Make Predictions":
