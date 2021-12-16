@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "age_detector"
+version = "0.1.0"
+description = ""
+authors = ["Martha <martha.e.braun@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.10"
+streamlit = "^1.2.0"
+opencv-python = "^4.5.4"
+matplotlib = "^3.5.1"
+keras = "^2.7.0"
+tensorflow = "^2.7.0"
+pandas = "^1.3.5"
+numpy = "^1.21.4"
+scikit-image = "^0.19.0"
+black = "^21.12b0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
