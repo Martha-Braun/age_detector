@@ -67,7 +67,7 @@ class DashboardApp:
         # Option Main Page
         if self.option == "Take Picture":
             st.title("Step 1: Take a Picture")
-            # st.markdown("Take a picture and we'll guess youre age")
+            # st.markdown("Take a picture and we'll guess your age")
             st.subheader("Smile!")
             run = st.checkbox("Run")
             FRAME_WINDOW = st.image([])
@@ -191,7 +191,7 @@ class DashboardApp:
                             }
 
                             st.markdown(
-                                f"You're age range is {age_buckets[np.argmax(predictions)]}"
+                                f"Your age range is {age_buckets[np.argmax(predictions)]}"
                             )
 
         # Option Predict Age
@@ -299,5 +299,5 @@ class DashboardApp:
                         }
 
                         st.markdown(
-                            f"You're age range is {age_buckets[np.argmax(predictions)]}"
+                            f"Your age range is {age_buckets[np.argmax(predictions)]}"
                         )
