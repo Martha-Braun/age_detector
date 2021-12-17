@@ -1,13 +1,14 @@
 # import libraries
 import os
-import pandas as pd
+
+# import pandas as pd
 import numpy as np
 from skimage.color.colorconv import rgb2gray
 import streamlit as st
-import datetime
 from PIL import Image
 import cv2
-import matplotlib as plt
+
+# import matplotlib as plt
 from pathlib import Path
 from re import search
 
@@ -16,9 +17,10 @@ from skimage.color import rgb2gray
 import tensorflow as tf
 from keras.models import model_from_json
 from skimage.transform import resize
-from keras.applications.resnet import ResNet50
-from tensorflow.keras.applications.imagenet_utils import preprocess_input
-from tensorflow.keras.optimizers import Adam
+
+# from keras.applications.resnet import ResNet50
+# from tensorflow.keras.applications.imagenet_utils import preprocess_input
+# from tensorflow.keras.optimizers import Adam
 
 
 class DashboardApp:
@@ -67,7 +69,6 @@ class DashboardApp:
         # Option Main Page
         if self.option == "Take Picture":
             st.title("Step 1: Take a Picture")
-            # st.markdown("Take a picture and we'll guess your age")
             st.subheader("Smile!")
             run = st.checkbox("Run")
             FRAME_WINDOW = st.image([])
@@ -76,17 +77,19 @@ class DashboardApp:
             while run:
                 _, frame = camera.read()  # return a single frame in variable `frame`
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = cv2.flip(frame, 1)
+                frame = cv2.flip(frame, 1)  # mirroring image
                 FRAME_WINDOW.image(frame)
                 color_conversion = cv2.COLOR_BGR2RGB  # color code to convert BGR to RGB
-                im_rgb = cv2.cvtColor(frame, color_conversion)
+                im_rgb = cv2.cvtColor(
+                    frame, color_conversion
+                )  # convert image's color code
                 cv2.imwrite(
                     "streamlit_dash/pictures/picture_taken/c1.png", im_rgb
                 )  # save image
             else:
                 st.write("Click Run to Start Webcam")
 
-        # Option Predict Age
+        # Option Predict from Uploaded Photo
         if self.option == "Predict from Uploaded Photo":
             st.title("Step 2: Detect Face(s)")
 
@@ -100,6 +103,7 @@ class DashboardApp:
                 )
                 gray = cv2.cvtColor(up_image, cv2.COLOR_BGR2GRAY)
 
+                # detect image and crop
                 faceCascade = cv2.CascadeClassifier(
                     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
                 )
@@ -130,21 +134,25 @@ class DashboardApp:
                 )
 
                 # show uploaded image marking faces detected
-                st.image(detected_image, channels="BGR")
+                st.image(detected_image, channels="BGR", width=300)
 
                 st.title("Step 3: Predict Age")
                 if st.button("Predict"):
-                    # # load json and create model
-                    # json_file = open("streamlit_dash/model/model_mb.json", "r")
-                    # loaded_model_json = json_file.read()
-                    # json_file.close()
-                    # loaded_model = model_from_json(loaded_model_json)
-                    # # load weights into new model
-                    # loaded_model.load_weights("streamlit_dash/model/mb_model_weights.h5")
-                    # print("Loaded model from disk")
+                    # load model + weights from json
+                    # load json and create model
+                    json_file = open("streamlit_dash/model2/model_final_tb.json", "r")
+                    loaded_model_json = json_file.read()
+                    json_file.close()
+                    loaded_model = model_from_json(loaded_model_json)
+                    # load weights into new model
+                    loaded_model.load_weights(
+                        "streamlit_dash/model2/final_tb_model_weights.h5"
+                    )
+                    print("Loaded model from disk")
 
-                    model_dir = "streamlit_dash/model/"
-                    loaded_model = tf.keras.models.load_model(model_dir)
+                    # load .pb model from directory
+                    # model_dir = "streamlit_dash/model/"
+                    # loaded_model = tf.keras.models.load_model(model_dir)
 
                     img_detected_faces = os.listdir(
                         "streamlit_dash/pictures/faces_detected"
@@ -176,8 +184,7 @@ class DashboardApp:
                                 img_folder_path + face, width=200
                             )  # img_folder_path + face
 
-                            # st.markdown(f"Number of classes {predictions.shape[1]}")
-                            # dictionary classes to age
+                            # dictionary classes to age buckets
                             age_buckets = {
                                 0: "0-7",
                                 1: "7-14",
@@ -194,7 +201,7 @@ class DashboardApp:
                                 f"Your age range is {age_buckets[np.argmax(predictions)]}"
                             )
 
-        # Option Predict Age
+        # Option Predict from WebCam Photo
         if self.option == "Predict from WebCam Photo":
             st.title("Step 2: Detect Face(s)")
 
@@ -205,7 +212,7 @@ class DashboardApp:
             image = cv2.imread(os.path.join(folder_path, image_file))
             # convert it to grayscale
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
+            # detect image and crop
             faceCascade = cv2.CascadeClassifier(
                 cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
             )
@@ -232,7 +239,7 @@ class DashboardApp:
             color_conversion = cv2.COLOR_BGR2RGB  # color code to convert BGR to RGB
             marked_img_rgb = cv2.cvtColor(detected_image, color_conversion)
 
-            # save image with faces marked
+            # save image with faces marked by red rectangle
             cv2.imwrite(
                 "streamlit_dash/pictures/picture_marked/marked_img_rgb.jpg",
                 marked_img_rgb,
@@ -243,17 +250,19 @@ class DashboardApp:
 
             st.title("Step 3: Predict Age")
             if st.button("Predict age"):
-                # # load json and create model
-                # json_file = open("streamlit_dash/model/model_mb.json", "r")
-                # loaded_model_json = json_file.read()
-                # json_file.close()
-                # loaded_model = model_from_json(loaded_model_json)
-                # # load weights into new model
-                # loaded_model.load_weights("streamlit_dash/model/mb_model_weights.h5")
-                # print("Loaded model from disk")
+                # load json and create model
+                json_file = open("streamlit_dash/model2/model_final_tb.json", "r")
+                loaded_model_json = json_file.read()
+                json_file.close()
+                loaded_model = model_from_json(loaded_model_json)
+                # load weights into new model
+                loaded_model.load_weights(
+                    "streamlit_dash/model2/final_tb_model_weights.h5"
+                )
+                print("Loaded model from disk")
 
-                model_dir = "streamlit_dash/model/"
-                loaded_model = tf.keras.models.load_model(model_dir)
+                # model_dir = "streamlit_dash/model/"
+                # loaded_model = tf.keras.models.load_model(model_dir)
 
                 img_detected_faces = os.listdir(
                     "streamlit_dash/pictures/faces_detected"
@@ -287,15 +296,16 @@ class DashboardApp:
                         # st.markdown(f"Number of classes {predictions.shape[1]}")
                         # dictionary classes to age
                         age_buckets = {
-                            0: "0-7",
-                            1: "7-14",
-                            2: "14-22",
-                            3: "22-30",
-                            4: "30-38",
-                            5: "38-47",
-                            6: "47-58",
+                            0: "0-3",
+                            1: "3-7",
+                            2: "7-14",
+                            3: "14-22",
+                            4: "22-30",
+                            5: "30-38",
+                            6: "38-47",
                             7: "47-58",
-                            8: "58-120",
+                            8: "58-70",
+                            9: "70-120",
                         }
 
                         st.markdown(
