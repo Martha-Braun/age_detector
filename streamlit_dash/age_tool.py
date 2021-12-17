@@ -1,26 +1,17 @@
 # import libraries
 import os
-
-# import pandas as pd
 import numpy as np
 from skimage.color.colorconv import rgb2gray
 import streamlit as st
 from PIL import Image
 import cv2
-
-# import matplotlib as plt
 from pathlib import Path
 from re import search
-
 from skimage.color import gray2rgb
 from skimage.color import rgb2gray
 import tensorflow as tf
 from keras.models import model_from_json
 from skimage.transform import resize
-
-# from keras.applications.resnet import ResNet50
-# from tensorflow.keras.applications.imagenet_utils import preprocess_input
-# from tensorflow.keras.optimizers import Adam
 
 
 class DashboardApp:
@@ -186,15 +177,16 @@ class DashboardApp:
 
                             # dictionary classes to age buckets
                             age_buckets = {
-                                0: "0-7",
-                                1: "7-14",
-                                2: "14-22",
-                                3: "22-30",
-                                4: "30-38",
-                                5: "38-47",
-                                6: "47-58",
+                                0: "0-3",
+                                1: "3-7",
+                                2: "7-14",
+                                3: "14-22",
+                                4: "22-30",
+                                5: "30-38",
+                                6: "38-47",
                                 7: "47-58",
-                                8: "58-120",
+                                8: "58-70",
+                                9: "70-120",
                             }
 
                             st.markdown(
