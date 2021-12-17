@@ -4,6 +4,7 @@ Streamlit application on which the age of a person can be predicted from an uplo
 ## Example
 ![app example 1](streamlit_dash/pictures/readme_pic/screens1.png)
 ![app example 2](streamlit_dash/pictures/readme_pic/screens2.png)
+<img src="streamlit_dash/pictures/readme_pic/screens2.png" width="48">
 
 
 ## Usage
