@@ -29,4 +29,4 @@ https://www.sciencedirect.com/science/article/abs/pii/S1077314220300424
 Prerak Agarwal, Age Detection using Facial Images: traditional Machine Learning vs. Deep Learning, 23 June 2020.
 
 ## Contributors
-@heliabrull @victoirearena @camillebeguin @Martha-Braun
+Victoire Arena, Camille Beguin, Martha Braun, Thomas Breitenstein, Hèlia Brull
